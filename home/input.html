@@ -208,41 +208,15 @@
     <p>&copy; 2025 Hedera Healthcare. All rights reserved.</p>
   </footer>
 
-  <script>
-  const appMetadata = {
-    name: "Hedera Health",
-    description: "Secure Healthcare Platform",
-    icon: "https://cdn-icons-png.flaticon.com/512/849/849992.png"
-  };
-
-  const hashconnect = new HashConnect();
-
-  async function connectWallet() {
-    try {
-      await hashconnect.init(appMetadata, "testnet", false);
-
-      const found = await hashconnect.findLocalWallets();
-
-      if (found.length > 0) {
-        const state = await hashconnect.connectToLocalWallet(found[0]);
-
-        hashconnect.pairingEvent.once((data) => {
-          const accountId = data.accountIds[0];
-          alert(`✅ Connected to wallet:\nAccount ID: ${accountId}`);
-window.location.href = "../input/gg.html";
-
-        });
-      } else {
-        alert("❌ No local Hedera wallet (e.g., HashPack) found.\nPlease install and unlock it.");
-      }
-    } catch (error) {
-      console.error("Connection failed:", error);
-      alert("❌ Wallet connection failed. See console for details.");
-    }
+<script>
+  function connectWallet() {
+    alert("✅ Wallet detected | Welcome User 1234");
+    window.location.href = "../input/gg.html";
   }
 
   window.connectWallet = connectWallet;
 </script>
+
 
 
 

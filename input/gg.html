@@ -11,7 +11,6 @@
       margin: 0;
       padding: 0;
     }
-
     .container {
       max-width: 1000px;
       margin: 0 auto;
@@ -20,7 +19,6 @@
       border-radius: 25px;
       box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
     }
-
     h1 {
       text-align: center;
       font-size: 36px;
@@ -28,27 +26,22 @@
       margin-bottom: 30px;
       font-weight: 700;
     }
-
     label {
       font-size: 16px;
       color: #5a5a5a;
       margin-bottom: 6px;
     }
-
     .form-group {
       margin-bottom: 20px;
     }
-
-    input, select {
+    input {
       padding: 14px;
       font-size: 16px;
       border: 1px solid #ddd;
       border-radius: 12px;
       width: 100%;
-      background-color: #ffffff;
       box-sizing: border-box;
     }
-
     .submit-btn {
       background-color: #0288d1;
       color: white;
@@ -60,18 +53,15 @@
       width: 100%;
       margin-top: 20px;
     }
-
     .submit-btn:hover {
       background-color: #0277bd;
     }
-
     .result {
       margin-top: 30px;
       padding: 20px;
       background: #f0f9ff;
       border-radius: 15px;
     }
-
     video {
       width: 100%;
       border-radius: 15px;
@@ -80,23 +70,33 @@
   </style>
 </head>
 <body>
-
   <div class="container">
     <h1>Patient Health Input</h1>
-
     <form id="inputForm">
       <div class="form-group"><label>Glucose</label><input name="glucose" type="number" required></div>
       <div class="form-group"><label>Cholesterol</label><input name="cholesterol" type="number" required></div>
+      <div class="form-group"><label>Hemoglobin</label><input name="hemoglobin" type="number" required></div>
+      <div class="form-group"><label>Platelets</label><input name="platelets" type="number" required></div>
+      <div class="form-group"><label>White Blood Cells</label><input name="white_blood_cells" type="number" required></div>
+      <div class="form-group"><label>Red Blood Cells</label><input name="red_blood_cells" type="number" required></div>
       <div class="form-group"><label>Hematocrit</label><input name="hematocrit" type="number" required></div>
+      <div class="form-group"><label>Mean Corpuscular Volume</label><input name="mean_corpuscular_volume" type="number" required></div>
+      <div class="form-group"><label>Mean Corpuscular Hemoglobin</label><input name="mean_corpuscular_hemoglobin" type="number" required></div>
+      <div class="form-group"><label>Mean Corpuscular Hemoglobin Concentration</label><input name="mean_corpuscular_hemoglobin_concentration" type="number" required></div>
       <div class="form-group"><label>Insulin</label><input name="insulin" type="number" required></div>
       <div class="form-group"><label>BMI</label><input name="bmi" type="number" required></div>
       <div class="form-group"><label>Systolic Blood Pressure</label><input name="systolic_blood_pressure" type="number" required></div>
       <div class="form-group"><label>Diastolic Blood Pressure</label><input name="diastolic_blood_pressure" type="number" required></div>
+      <div class="form-group"><label>Triglycerides</label><input name="triglycerides" type="number" required></div>
       <div class="form-group"><label>HbA1c</label><input name="hba1c" type="number" required></div>
       <div class="form-group"><label>LDL Cholesterol</label><input name="ldl_cholesterol" type="number" required></div>
       <div class="form-group"><label>HDL Cholesterol</label><input name="hdl_cholesterol" type="number" required></div>
+      <div class="form-group"><label>ALT</label><input name="alt" type="number" required></div>
+      <div class="form-group"><label>AST</label><input name="ast" type="number" required></div>
       <div class="form-group"><label>Heart Rate</label><input name="heart_rate" type="number" required></div>
+      <div class="form-group"><label>Creatinine</label><input name="creatinine" type="number" required></div>
       <div class="form-group"><label>Troponin</label><input name="troponin" type="number" required></div>
+      <div class="form-group"><label>C-reactive Protein</label><input name="c_reactive_protein" type="number" required></div>
       <button class="submit-btn" type="submit">Submit</button>
     </form>
 
@@ -108,36 +108,56 @@
       <video id="videoResult" controls></video>
     </div>
   </div>
+
   <script>
-document.getElementById('inputForm').addEventListener('submit', async function(e) {
-  e.preventDefault();
+  document.getElementById('inputForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
 
-  const form = e.target;
-  const formData = new FormData(form);
-  const data = {};
-  for (const [key, value] of formData.entries()) {
-    data[key] = parseFloat(value);
-  }
+    const formData = new FormData(e.target);
+    const data = {};
+    for (const [key, value] of formData.entries()) {
+      data[key] = parseFloat(value);
+    }
 
-  const res = await fetch("http://127.0.0.1:5000/predict", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
+    const resultBox = document.getElementById("resultBox");
+    const diseaseResult = document.getElementById("diseaseResult");
+    const treatmentResult = document.getElementById("treatmentResult");
+    const video = document.getElementById("videoResult");
+
+    // Clear previous result
+    resultBox.style.display = "none";
+    diseaseResult.innerText = "";
+    treatmentResult.innerText = "";
+    video.src = "";
+
+    try {
+      const res = await fetch("http://127.0.0.1:5000/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+
+      const result = await res.json();
+
+      if (result.error) {
+        alert("Error: " + result.error);
+        return;
+      }
+
+      diseaseResult.innerText = result.disease;
+      treatmentResult.innerText = result.treatment;
+      video.src = result.video;
+      video.load();  // Ensures the new video loads
+      resultBox.style.display = "block";
+
+      // Optional: Scroll to result smoothly
+      resultBox.scrollIntoView({ behavior: "smooth" });
+
+    } catch (err) {
+      alert("Failed to connect to backend.");
+      console.error(err);
+    }
   });
-
-  const result = await res.json();
-
-  if (result.error) {
-    alert("Error: " + result.error);
-    return;
-  }
-
-  document.getElementById("resultBox").style.display = "block";
-  document.getElementById("diseaseResult").innerText = result.disease;
-  document.getElementById("treatmentResult").innerText = result.treatment;
-  document.getElementById("videoResult").src = result.video;
-});
 </script>
-
 </body>
 </html>
