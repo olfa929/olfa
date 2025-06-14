@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patient Health Input</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #e1f5fe;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 40px;
+      background-color: #ffffff;
+      border-radius: 25px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 36px;
+      color: #0288d1;
+      margin-bottom: 30px;
+      font-weight: 700;
+    }
+
+    label {
+      font-size: 16px;
+      color: #5a5a5a;
+      margin-bottom: 6px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    input, select {
+      padding: 14px;
+      font-size: 16px;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      width: 100%;
+      background-color: #ffffff;
+      box-sizing: border-box;
+    }
+
+    .submit-btn {
+      background-color: #0288d1;
+      color: white;
+      padding: 16px 25px;
+      border: none;
+      border-radius: 12px;
+      font-size: 18px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    .submit-btn:hover {
+      background-color: #0277bd;
+    }
+
+    .result {
+      margin-top: 30px;
+      padding: 20px;
+      background: #f0f9ff;
+      border-radius: 15px;
+    }
+
+    video {
+      width: 100%;
+      border-radius: 15px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Patient Health Input</h1>
+
+    <form id="inputForm">
+      <div class="form-group"><label>Glucose</label><input name="glucose" type="number" required></div>
+      <div class="form-group"><label>Cholesterol</label><input name="cholesterol" type="number" required></div>
+      <div class="form-group"><label>Hematocrit</label><input name="hematocrit" type="number" required></div>
+      <div class="form-group"><label>Insulin</label><input name="insulin" type="number" required></div>
+      <div class="form-group"><label>BMI</label><input name="bmi" type="number" required></div>
+      <div class="form-group"><label>Systolic Blood Pressure</label><input name="systolic_blood_pressure" type="number" required></div>
+      <div class="form-group"><label>Diastolic Blood Pressure</label><input name="diastolic_blood_pressure" type="number" required></div>
+      <div class="form-group"><label>HbA1c</label><input name="hba1c" type="number" required></div>
+      <div class="form-group"><label>LDL Cholesterol</label><input name="ldl_cholesterol" type="number" required></div>
+      <div class="form-group"><label>HDL Cholesterol</label><input name="hdl_cholesterol" type="number" required></div>
+      <div class="form-group"><label>Heart Rate</label><input name="heart_rate" type="number" required></div>
+      <div class="form-group"><label>Troponin</label><input name="troponin" type="number" required></div>
+      <button class="submit-btn" type="submit">Submit</button>
+    </form>
+
+    <div class="result" id="resultBox" style="display: none;">
+      <h3>Diagnosis Result</h3>
+      <p><strong>Disease:</strong> <span id="diseaseResult"></span></p>
+      <p><strong>Treatment Plan:</strong></p>
+      <p id="treatmentResult"></p>
+      <video id="videoResult" controls></video>
+    </div>
+  </div>
+  <script>
+document.getElementById('inputForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+
+  const form = e.target;
+  const formData = new FormData(form);
+  const data = {};
+  for (const [key, value] of formData.entries()) {
+    data[key] = parseFloat(value);
+  }
+
+  const res = await fetch("http://127.0.0.1:5000/predict", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  });
+
+  const result = await res.json();
+
+  if (result.error) {
+    alert("Error: " + result.error);
+    return;
+  }
+
+  document.getElementById("resultBox").style.display = "block";
+  document.getElementById("diseaseResult").innerText = result.disease;
+  document.getElementById("treatmentResult").innerText = result.treatment;
+  document.getElementById("videoResult").src = result.video;
+});
+</script>
+
+</body>
+</html>
